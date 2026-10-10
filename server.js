@@ -3,23 +3,45 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { google } = require('googleapis');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Path file kredensial Google Service Account
-const KEYFILEPATH = path.join(__dirname, 'service-account.json');
 const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
 
 // ID Folder Utama (Parent Folder) Google Drive
-const PARENT_FOLDER_ID = '1UJYI-qRumgXwVia71IDd7PjZUNJz9Muy';
+const PARENT_FOLDER_ID = '1t794FUtntfHIyKrXPRUtYeXQqoJIojpu';
 
-// Otentikasi ke Google Drive API
-const auth = new google.auth.GoogleAuth({
-  keyFile: KEYFILEPATH,
-  scopes: SCOPES,
-});
+/**
+ * Konfigurasi Otentikasi Google Service Account
+ * Membaca dari Environment Variable (Hosting) atau File Lokal (Komputer)
+ */
+let auth;
+
+if (process.env.GOOGLE_SERVICE_ACCOUNT) {
+  // Jika di-hosting di Koyeb/Render/Railway (membaca dari Environment Variable)
+  console.log('🔒 Menggunakan kredensial Google dari Environment Variable');
+  const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+  auth = new google.auth.GoogleAuth({
+    credentials,
+    scopes: SCOPES,
+  });
+} else {
+  // Jika dijalankan secara lokal di komputer (membaca file service-account.json)
+  const KEYFILEPATH = path.join(__dirname, 'service-account.json');
+  if (fs.existsSync(KEYFILEPATH)) {
+    console.log('📁 Menggunakan kredensial dari file lokal service-account.json');
+    auth = new google.auth.GoogleAuth({
+      keyFile: KEYFILEPATH,
+      scopes: SCOPES,
+    });
+  } else {
+    console.error('❌ ERROR: Kredensial Google Service Account tidak ditemukan!');
+    process.exit(1);
+  }
+}
 
 const drive = google.drive({ version: 'v3', auth });
 
@@ -202,6 +224,6 @@ setInterval(() => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`===================================================`);
-  console.log(`🚀 Server Monitoring (Fast Cache) http://localhost:${PORT}`);
+  console.log(`🚀 Server Monitoring berjalan di port ${PORT}`);
   console.log(`===================================================`);
 });
