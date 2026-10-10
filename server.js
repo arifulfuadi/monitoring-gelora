@@ -12,7 +12,7 @@ const io = new Server(server);
 const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
 
 // ID Folder Utama (Parent Folder) Google Drive
-const PARENT_FOLDER_ID = '1t794FUtntfHIyKrXPRUtYeXQqoJIojpu';
+const PARENT_FOLDER_ID = '1UJYI-qRumgXwVia71IDd7PjZUNJz9Muy';
 
 /**
  * Konfigurasi Otentikasi Google Service Account
